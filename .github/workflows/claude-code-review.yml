@@ -1,0 +1,56 @@
+# ============================================================================
+# Claude Code — Automated PR Review
+# ============================================================================
+# Thin wrapper around PitziLabs/shared-workflows/claude-review.yml.
+# Pinned to Haiku. This repo is a prompt-engineered markdown methodology, so
+# the review focuses on spec coherence, link/cross-reference integrity, and
+# data-privacy hygiene rather than code correctness. Markdown is the product
+# here, so *.md is intentionally NOT path-ignored; only large data fixtures
+# and the license are.
+# ============================================================================
+
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+    paths-ignore:
+      - "LICENSE"
+      - ".gitignore"
+      - "examples/music-inventory.json"
+      - "examples/music-tree"
+
+jobs:
+  claude-review:
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    uses: PitziLabs/shared-workflows/.github/workflows/claude-review.yml@main
+    secrets: inherit
+    with:
+      review_prompt: |
+        This repository is a prompt-engineered methodology, not code. The
+        product is a markdown spec (`music-curation-methodology.md`) that turns
+        a low-effort music-collection dump into a clean, queryable taste
+        profile; `examples/` holds one real worked instance. Focus your review
+        on:
+
+        1. **Spec coherence** — does the methodology stay internally consistent?
+           Watch for phases, discard heuristics, or exit criteria that
+           contradict each other or that a fresh session couldn't follow. New
+           heuristics should say what they catch, with an example.
+        2. **Cross-reference integrity** — broken relative links and paths
+           (the `examples/` profile links back to the root methodology),
+           companion-artifact references, and the `music-inventory.json` schema
+           matching the "Outputs produced" section of the methodology.
+        3. **Data-privacy hygiene** — the `examples/` are personal taste data
+           published deliberately. Flag anything a PR introduces that goes
+           beyond taste: credentials, API tokens, raw account exports, real
+           personal identifiers, or absolute home-directory paths.
+        4. **Framing** — the README must keep its Claude co-authorship
+           disclosure at the top; "smoke"/"kill" must read as "discard from
+           analysis," never "delete files."
+        5. **Markdown correctness** — malformed tables, broken headings,
+           dead links.
